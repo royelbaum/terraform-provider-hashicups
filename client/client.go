@@ -1,11 +1,10 @@
 package client
 
 import (
-	"crypto/tls"
+	"github.com/AthenZ/athenz/libs/go/tls/config"
 	"net/http"
 
 	"github.com/AthenZ/athenz/clients/go/zms"
-	"go.vzbuilders.com/go/ytls"
 )
 
 type ZmsClient interface {
@@ -237,7 +236,7 @@ func (c Client) DeleteMembership(domain string, roleMember string, member zms.Me
 }
 
 func NewClient(url string, certFile string, keyFile string) (*Client, error) {
-	tlsConfig, err := GetTLSConfigFromFiles(certFile, keyFile)
+	tlsConfig, err := config.GetTLSConfigFromFiles(certFile, keyFile)
 	if err != nil {
 		return nil, err
 	}
@@ -249,18 +248,4 @@ func NewClient(url string, certFile string, keyFile string) (*Client, error) {
 		Transport: &transport,
 	}
 	return client, err
-}
-
-func GetTLSConfigFromFiles(certFile, keyFile string) (*tls.Config, error) {
-	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
-	if err != nil {
-		return nil, err
-	}
-	config := ytls.ClientTLSConfig()
-	config.Certificates = []tls.Certificate{cert}
-
-	// Set Renegotiation explicitly
-	config.Renegotiation = tls.RenegotiateOnceAsClient
-
-	return config, err
 }
